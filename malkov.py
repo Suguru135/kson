@@ -1,10 +1,13 @@
 import sqlite3
 import MeCab
 
+import random
+
 class Malkov_na_sqlite:
     def __init__(self, cursor):
         self.cursor = cursor
 
+    def reset(self):
         try:
             self.cursor.execute("DROP TABLE IF EXISTS malkov")
             self.cursor.execute("CREATE TABLE malkov (prefix TEXT NOT NULL, prefix2 TEXT NOT NULL, suffix TEXT NOT NULL)")
@@ -33,6 +36,17 @@ class Malkov_na_sqlite:
             return self.insert(line[1:])
 
 
+    def remake(self, word):
+        self.cursor.execute("SELECT * FROM malkov WHERE prefix=?", (word,))
+        results = self.cursor.fetchall()
+
+        if results == []:
+            return ""
+
+        else:
+            prefix, prefix2, suffix = random.choice(results)
+            return prefix2 + suffix + self.remake(suffix)
+
 def get_lines_from_a_file(fname):
     m = MeCab.Tagger("-Owakati")
 
@@ -51,12 +65,19 @@ def main():
     cursor = conn.cursor()
 
     mal = Malkov_na_sqlite(cursor)
+    mal.reset()
 
     lines = get_lines_from_a_file("./data.txt")
     for line in lines:
         mal.insert(line)
 
     conn.commit()
+
+
+    keyword = "努力"
+    print(">" + keyword + mal.remake(keyword))
+
+
     conn.close()
 
 
