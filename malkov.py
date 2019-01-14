@@ -73,14 +73,18 @@ def main():
 
     conn.commit()
 
-
-    keyword = "努力"
-    print(">" + keyword + mal.remake(keyword))
-
+    main2(mal)
 
     conn.close()
 
+def main2(mal):
+    keyword = input("b:")
+    if keyword == "owari":
+        return 0
 
+    print("k:" + keyword + mal.remake(keyword))
+
+    main2(mal)
 
 if __name__ == "__main__":
     main()
